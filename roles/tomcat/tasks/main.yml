@@ -1,0 +1,67 @@
+---
+# tasks file for tomcat
+- block:
+  - name: download tomcat
+    get_url: 
+      url: http://www-eu.apache.org/dist/tomcat/tomcat-8/v8.5.20/bin/apache-tomcat-8.5.20.tar.gz
+      dest: /home/rundeck/apache-tomcat-8.5.20.tar.gz
+
+  # - name: create tomcat dir
+  #   file:
+  #     path: /home/rundeck/apache-tomcat-8.5.20
+  #     state: directory
+
+  - name: untar tomcat
+    unarchive:
+      src: /home/rundeck/apache-tomcat-8.5.20.tar.gz
+      dest: /home/rundeck/
+      remote_src: true
+
+  - name: create soft link for tomcat
+    file: 
+      src: /home/rundeck/apache-tomcat-8.5.20
+      dest: /home/rundeck/tomcat85
+      state: link
+
+  - name: create enviroment variable CATALINA_HOME
+    lineinfile:
+      path: /home/rundeck/.bashrc
+      regexp: '^export CATALINA_HOME='
+      line: 'export CATALINA_HOME=/home/rundeck/tomcat85'
+
+  - name: create enviroment variable CATALINA_BASE
+    lineinfile:
+      path: /home/rundeck/.bashrc
+      regexp: '^export CATALINA_BASE='
+      line: 'export CATALINA_BASE=/home/rundeck/tomcat85'
+
+  - name: create enviroment variable CATALINA_HOME
+    lineinfile:
+      path: /home/rundeck/.bash_profile
+      regexp: '^export CATALINA_HOME='
+      line: 'export CATALINA_HOME=/home/rundeck/tomcat85'
+
+  - name: create enviroment variable CATALINA_BASE
+    lineinfile:
+      path: /home/rundeck/.bash_profile
+      regexp: '^export CATALINA_BASE='
+      line: 'export CATALINA_BASE=/home/rundeck/tomcat85'
+
+  - name: set enviroment variables
+    lineinfile:
+      path: /home/rundeck/tomcat85/bin/setenv.sh
+      regexp: '^JAVA_HOME='
+      line: 'JAVA_HOME=/home/rundeck/jdk18'
+      create: yes 
+      state: present 
+  become: true
+  become_user: rundeck
+
+- name: Start Tomcat
+  become: true
+  become_user: rundeck
+  command: nohup /home/rundeck/tomcat85/bin/startup.sh
+  tags: startTomcat
+  register: out
+
+- debug: var=out.stdout_lines

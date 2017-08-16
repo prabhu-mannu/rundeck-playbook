@@ -1,0 +1,2 @@
+[rundeck]
+54.169.79.73  ansible_connection=ssh  ansible_user=prabhu

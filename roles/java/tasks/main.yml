@@ -1,0 +1,55 @@
+---
+- name: add rundeck user
+  become: true
+  become_user: root
+  become_method: sudo
+  user:
+    name: rundeck
+    generate_ssh_key: yes
+    ssh_key_bits: 2048
+
+- name: copy jdk
+  become: true
+  become_user: rundeck
+  copy:
+    src: "{{ role_path }}/files/jdk-8u144-linux-x64.tar"
+    dest: /home/rundeck/
+
+# - name: create java dir
+#   become: true
+#   become_user: rundeck
+#   file:
+#     path: /home/rundeck/jdk-8u144
+#     state: directory
+
+- name: untar java jdk 
+  become: true
+  become_user: rundeck
+  unarchive:
+    src: /home/rundeck/jdk-8u144-linux-x64.tar
+    dest: /home/rundeck/
+    remote_src: yes
+
+- name: create soft link for jdk
+  become: true
+  become_user: rundeck
+  file: 
+    src: /home/rundeck/jdk1.8.0_144
+    dest: /home/rundeck/jdk18
+    state: link
+
+- name: set enviroment variable
+  become: true
+  become_user: rundeck
+  lineinfile:
+    path: /home/rundeck/.bashrc
+    regexp: '^export JAVA_HOME='
+    line: 'export JAVA_HOME=/home/rundeck/jdk18'
+
+- name: set enviroment variable
+  become: true
+  become_user: rundeck
+  lineinfile:
+    path: /home/rundeck/.bash_profile
+    regexp: '^export JAVA_HOME='
+    line: 'export JAVA_HOME=/home/rundeck/jdk18'

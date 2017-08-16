@@ -1,0 +1,4 @@
+- hosts: rundeck
+  roles:
+  - java
+  - tomcat
