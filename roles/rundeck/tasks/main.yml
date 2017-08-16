@@ -1,2 +1,43 @@
 ---
 # tasks file for rundeck
+- name: install unzip
+  yum:
+    name: unzip
+    state: present
+  become: true
+  become_user: root
+  become_method: sudo
+- block:
+  - name: create tmp folder
+    file:
+      path: /home/rundeck/tmp
+      state: directory
+      owner: rundeck
+      group: rundeck
+
+  - name: download rundeck
+    get_url: 
+      url: http://download.rundeck.org/war/rundeck-2.8.4.war
+      dest: /home/rundeck/tmp/rundeck-2.8.4.war
+
+  - name: unzip war file
+    command: unzip -qq  /home/rundeck/tmp/rundeck-2.8.4.war  -d /home/rundeck/tomcat85/webapps/rundeck
+
+  - name: create rundeck base folder
+    file:
+      path: /home/rundeck/rundeck_base
+      state: directory
+      owner: rundeck
+      group: rundeck
+
+  - name: create rundeck folders
+    file:
+      path: '/home/rundeck/rundeck_base/{{item}}'
+      state: directory
+      owner: rundeck
+      group: rundeck
+    with_items:
+    - ["etc","libext","projects","var","var\\logs","var\\tmp"]
+    
+  become: true
+  become_user: rundeck
